@@ -30,26 +30,40 @@ class CounterStore {
   updateScene(scene) {
     if (this.currentScene.name === 'pageTwo') {
       console.log('update scene', scene);
-      if (scene.url) {
+      if (scene.url && this.currentScene.url !== scene.url && scene.url !== 'about:blank') {
         this.currentScene.url = scene.url;
       }
-      if (scene.canGoBack) {
-        this.currentScene.canGoBack = scene.canGoBack;
+      if (this.currentScene.canGoBack !== scene.canGoBack) {
+        this.currentScene.canGoBack = scene.canGoBack || false;
       }
     }
   }
 
   navigate(scene) {
-    this.back = false;
     console.log('navigate', scene);
+
+    this.back = false;
+
     if (this.currentScene && this.currentScene.name === scene.name) {
       this.updateScene(scene);
       return;
     }
+
     console.log('new scene', scene);
+    let webviewUrl = '';
+    if (!scene.webviewUrl) {
+      if (this.currentScene && this.currentScene.webviewUrl) {
+        webviewUrl = this.currentScene.webviewUrl;
+      }
+      if (scene.name === 'pageTwo' && scene.url) {
+        webviewUrl = scene.url;
+      }
+    }
+
     this.scenes.push({
       ...defaultScene,
       ...scene,
+      webviewUrl,
     });
   }
 
@@ -63,7 +77,11 @@ class CounterStore {
 
   pop() {
     this.back = true;
-    this.scenes.pop();
+    if (this.scenes.length > 1) {
+      this.scenes.pop();
+      return true;
+    }
+    return false;
   }
 
   increase() {

@@ -33,14 +33,36 @@ const styles = StyleSheet.create({
   },
 });
 
+const normalizeUrl = (url) => {
+  if (!url) {
+    return url;
+  }
+  return url.trim().replace(/\/$/, '').split('#')[0];
+};
+
 class PageTwo extends Component {
 
   constructor(props) {
     super(props);
+    this.lastUrl = null;
     this.webview = null;
     const store = this.props.store;
+    reaction(() => store.currentScene.url, () => {
+      console.log('PageTwo reaction currentScene.url');
+      const url = normalizeUrl(store.currentScene.url);
+      const shouldUpdate = url
+        && normalizeUrl(store.currentScene.webviewUrl) !== url
+        && this.lastUrl !== url
+        && store.currentScene.name === 'pageTwo';
+      if (shouldUpdate) {
+        console.log('webview updating webviewUrl',
+          url, this.lastUrl, store.currentScene.webviewUrl
+        );
+        store.currentScene.webviewUrl = store.currentScene.url;
+      }
+    });
     reaction(() => store.currentScene.shouldGoBack, () => {
-      console.log('PageTwo reaction');
+      console.log('PageTwo reaction shouldGoBack');
       const currentScene = store.currentScene;
       if (currentScene.shouldGoBack && this.webview) {
         console.log('webview goBack');
@@ -63,7 +85,7 @@ class PageTwo extends Component {
     console.log('webview event', event);
     const store = this.props.store;
     const currentScene = store.currentScene;
-    if (!currentScene.canGoBack && event.canGoBack) {
+    if (currentScene.canGoBack !== event.canGoBack) {
       console.log('webview event canGoBack');
       store.updateScene({ canGoBack: event.canGoBack });
     }
@@ -73,16 +95,16 @@ class PageTwo extends Component {
 
   render() {
     const store = this.props.store;
-    const currentScene = store.currentScene;
-    console.log('PageTwo render', currentScene);
+    this.lastUrl = normalizeUrl(store.currentScene.webviewUrl);
     const goToPageCounter = () => store.navigate({ name: 'counter' });
     const goToPageTwo = (url) => store.navigate({ name: 'pageTwo', url });
     const goToWebview = (url) => () => goToPageTwo(url);
+    console.log('PageTwo render', store.currentScene.webviewUrl);
     return (<View style={styles.container}>
       <WebView
         ref={(webview) => { this.webview = webview; }}
         style={styles.webView}
-        source={{ uri: currentScene.url }}
+        source={{ uri: store.currentScene.webviewUrl }}
         javaScriptEnabled
         domStorageEnabled
         startInLoadingState

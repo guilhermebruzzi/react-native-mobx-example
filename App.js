@@ -1,5 +1,8 @@
 import React, { Component } from 'react';
 import {
+  BackAndroid,
+} from 'react-native';
+import {
   Router,
   Scene,
   Actions,
@@ -32,14 +35,34 @@ class App extends Component {
     });
   }
 
+  componentDidMount() {
+    BackAndroid.addEventListener(
+      'hardwareBackPress',
+      this.onHardwareBackPress
+    );
+  }
+
+  componentWillUnmount() {
+    BackAndroid.removeEventListener(
+      'hardwareBackPress',
+      this.onHardwareBackPress
+    );
+  }
+
+  @autobind
+  onHardwareBackPress() {
+    return this.onBack();
+  }
+
+
   @autobind
   onBack() {
-    console.log('onBack');
-    const wentBack = store.goBack();
-    console.log('onBack wentBack', wentBack);
+    let wentBack = store.goBack();
     if (!wentBack) {
-      store.pop();
+      wentBack = store.pop();
     }
+    console.log('onBack wentBack', wentBack);
+    return wentBack;
   }
 
   render() {
