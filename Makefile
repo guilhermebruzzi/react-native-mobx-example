@@ -44,4 +44,4 @@ lint:
 run: ios
 
 openios:
-	open ios/BSNAppHome.xcodeproj/
+	open ios/RNMobx.xcodeproj/
