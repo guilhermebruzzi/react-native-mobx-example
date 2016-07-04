@@ -54,7 +54,6 @@ class App extends Component {
     return this.onBack();
   }
 
-
   @autobind
   onBack() {
     let wentBack = store.goBack();

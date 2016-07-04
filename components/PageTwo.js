@@ -126,7 +126,6 @@ class PageTwo extends Component {
 
 PageTwo.propTypes = {
   store: PropTypes.object,
-  text: PropTypes.string,
 };
 
 module.exports = PageTwo;
